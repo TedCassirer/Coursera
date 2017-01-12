@@ -52,8 +52,24 @@ def q5():
 
 def q6():
     counties = census_df[census_df.SUMLEV == 50]
-    largestCounties = counties.groupby('STNAME')['CENSUS2010POP'].nlargest(3)
-    
+    counties = counties.groupby('STNAME')['CENSUS2010POP']
+    counties = counties.nlargest(3).reset_index()
+    counties = counties.groupby('STNAME')['CENSUS2010POP'].sum()
+    return list(counties.nlargest(3).index)
+
+def q7():
+    counties = census_df[census_df.SUMLEV == 50]
+    columns = ['POPESTIMATE2010',
+               'POPESTIMATE2011',
+               'POPESTIMATE2012',
+               'POPESTIMATE2013',
+               'POPESTIMATE2014',
+               'POPESTIMATE2015']
+    max_year = counties[columns].max(axis=1)
+    min_year = counties[columns].min(axis=1)
+    diff = max_year - min_year
+    row = diff.idxmax()
+    return counties.loc[row]['STNAME']
 
 g = df['Gold']
 g1 = df['Gold.1']
