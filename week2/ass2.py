@@ -71,6 +71,13 @@ def q7():
     row = diff.idxmax()
     return counties.loc[row]['STNAME']
 
+def q8():
+    counties = census_df[census_df.SUMLEV == 50]
+    washingtons = counties[(counties['REGION'] <= 2) &
+                 (counties['CTYNAME'].str.startswith('Washington'))]
+    washingtons = washingtons[washingtons.POPESTIMATE2015 > washingtons.POPESTIMATE2014]
+    return pd.DataFrame([washingtons.STNAME, washingtons.CTYNAME]).T
+
 g = df['Gold']
 g1 = df['Gold.1']
 
