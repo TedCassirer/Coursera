@@ -46,10 +46,11 @@ def q3():
     return avg_gdp.sort_values(ascending=False)
     
 def q4():
-    Top15 = answer_one()
-    country = answer_three().index[5]
+    Top15 = q1()
+    country = q3().index[5]
     gdps = Top15[Top15.index == country]
     gdps = gdps[gdps.columns[-10:]]
+    return gdps.max(axis=1)-gdps.min(axis=1)
 
 def q5():
     Top15 = q1()
@@ -91,3 +92,46 @@ def q10():
     res = ren.apply(lambda x: int(x >= med))
     res.name = 'HighRenew'
     return res
+
+ContinentDict  = {'China':'Asia', 
+                  'United States':'North America', 
+                  'Japan':'Asia', 
+                  'United Kingdom':'Europe', 
+                  'Russian Federation':'Europe', 
+                  'Canada':'North America', 
+                  'Germany':'Europe', 
+                  'India':'Asia',
+                  'France':'Europe', 
+                  'South Korea':'Asia', 
+                  'Italy':'Europe', 
+                  'Spain':'Europe', 
+                  'Iran':'Asia',
+                  'Australia':'Australia', 
+                  'Brazil':'South America'}
+
+def q11():
+    Top15 = q1()
+    es = Top15['Energy Supply per Capita'].astype(float)
+    pop = Top15['Energy Supply'] / es
+    pop = pop.astype(float)
+    continents = pop.index.map(lambda x: ContinentDict[x])
+    df = pd.DataFrame()
+    df['size'] = pop
+    df['Continents'] = continents
+    group = df.groupby('Continents')
+    df = group.count()
+    df['sum'] = group.sum()
+    df['mean'] = group.mean()
+    df['std'] = group.std()
+    return df
+
+def q12():
+    Top15 = q1()
+    Top15['Continent'] = Top15.index.map(lambda x: ContinentDict[x])
+    Top15 = Top15.reset_index()
+    df = Top15[['Continent', '% Renewable']]
+    bins = pd.cut(df['% Renewable'], 5)
+    df['bins'] = bins
+    df = df.groupby(['Continent', 'bins']).count()
+    df = df.dropna()
+    return df['% Renewable']
