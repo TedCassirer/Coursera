@@ -9,12 +9,13 @@ gdplev['Diff'] = gdplev.GDP.diff()
 
 def get_list_of_university_towns():
     data = []
-    state_re = re.compile(r"(\w+)(\[edit\]$)")
     with open('university_towns.txt') as towns:
         for line in towns:
-            if state_re.match(line):
-                state = line[:-7]
+            line = line.strip()
+            if line[-6:] == '[edit]':
+                state = line[:-6]
             else:
+                
                 parenthesis = line.find('(')
                 if parenthesis != -1:
                     line = line[:parenthesis]
@@ -53,22 +54,25 @@ def convert_housing_data_to_quarters():
 def run_ttest():
     p_req = 0.01
     
-    universities = get_list_of_university_towns().set_index(['State', 'RegionName'])
-    rstart = get_recession_start()
-    rbottom = get_recession_bottom()
+    u= get_list_of_university_towns().set_index(['State', 'RegionName'])
+    rs = get_recession_start()
+    rb = get_recession_bottom()
     hp = convert_housing_data_to_quarters()
-    hp_ratio = (hp[rstart] / hp[rbottom])
+    hp_ratio = (hp[rs] / hp[rb])
     hp_ratio.name = 'PriceRatio'
     hp_ratio = hp_ratio.dropna()
-    uni_ratio = universities.join(hp_ratio, how='inner')
-    non_uni_ratio = hp_ratio.drop(hp_ratio.index[hp_ratio.index.isin(uni_ratio.index)])
-
-    ur_mean = uni_ratio.mean()[0]
-    nur_mean = non_uni_ratio.mean()
-    return ttest_ind(non_uni_ratio, uni_ratio)
-    t, p = ttest_ind(non_uni_ratio, uni_ratio)
-    str_res = ['university town', 'non-university town']
-    return (p[0] < p_req, p[0], str_res[ur_mean < nur_mean])
+    up_ratio = u.join(hp_ratio, how='inner').PriceRatio
+    hp_ratio = hp_ratio.drop(hp_ratio.index[hp_ratio.index.isin(up_ratio.index)])
+    up_mean = up_ratio.mean()
+    hp_mean = hp_ratio.mean()
+    print(up_mean)
+    print(hp_mean)
+    if up_mean < hp_mean:
+        s = 'university town'
+    else:
+        s = 'non-university town'
+    t, p = ttest_ind(hp_ratio, up_ratio)
+    return (p < p_req, p, s)
     '''First creates new data showing the decline or growth of housing prices
     between the recession start and the recession bottom. Then runs a ttest
     comparing the university town values to the non-university towns values, 

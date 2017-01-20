@@ -59,17 +59,18 @@ def q6():
 
 def q7():
     counties = census_df[census_df.SUMLEV == 50]
-    columns = ['POPESTIMATE2010',
+    c = ['POPESTIMATE2010',
                'POPESTIMATE2011',
                'POPESTIMATE2012',
                'POPESTIMATE2013',
                'POPESTIMATE2014',
                'POPESTIMATE2015']
-    max_year = counties[columns].max(axis=1)
-    min_year = counties[columns].min(axis=1)
-    diff = max_year - min_year
-    row = diff.idxmax()
-    return counties.loc[row]['STNAME']
+    cs = counties.ix[:, c]
+    max_year = cs.idxmax(axis=1)
+    min_year = cs.idxmin(axis=1)
+    diff = cs.lookup(cs.index, max_year) - cs.lookup(cs.index, min_year)
+    row = diff.argmax()
+    return counties.iloc[row]['CTYNAME']
 
 def q8():
     counties = census_df[census_df.SUMLEV == 50]
